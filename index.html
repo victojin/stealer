@@ -6,7 +6,7 @@
     <title>STEALER 수주회 주문</title>
     <style>
         :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; --kakao: #fee500; --price-color: #e63946; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px 15px 100px 15px; color: #333; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px 15px 120px 15px; color: #333; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 15px; }
@@ -35,7 +35,7 @@
 
         .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .email-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .kakao-btn { width: 100%; padding: 15px; background: var(--kakao); color: #3c1e1e; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .kakao-btn { width: 100%; padding: 15px; background: var(--kakao); color: #3c1e1e; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); color: white; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
@@ -70,7 +70,11 @@
         <div class="summary-box" id="orderSummary"></div>
         
         <div style="margin-top:20px;">
-            <button type="button" class="kakao-btn" onclick="sendKakao()">카톡으로 내역 공유하기</button>
+            <button type="button" class="kakao-btn" onclick="shareKakao()">
+                <img src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_small.png" width="20">
+                카카오톡으로 바로 공유
+            </button>
+            
             <div style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
                 <label>이메일로 내역 받기</label>
                 <input type="email" id="userEmail" placeholder="example@email.com">
@@ -141,7 +145,7 @@
         });
         if(details.length === 0) return alert("제품을 선택하세요.");
         
-        currentOrderText = `[지점명] ${currentBranch}\n\n[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
+        currentOrderText = `[STEALER 주문내역]\n지점: ${currentBranch}\n\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
         document.getElementById('loader').style.display = 'flex';
 
         const fd = new FormData();
@@ -175,16 +179,24 @@
         .then(() => { alert("메일 발송 완료!"); btn.disabled = false; btn.innerText = "이메일 전송하기"; });
     }
 
-    // 카카오톡 공유 함수 (커스텀 스킴 방식)
-    function sendKakao() {
-        const text = encodeURIComponent(`[STEALER 주문확인서]\n\n${currentOrderText}`);
-        const url = `kr.kakao.talk://send?text=${text}`;
-        
-        // 모바일 환경 체크 후 카톡 실행
-        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            window.location.href = url;
+    // ★ 카카오톡 즉시 공유 함수 (Web Share API 사용) ★
+    async function shareKakao() {
+        const shareData = {
+            title: 'STEALER 주문서',
+            text: currentOrderText
+        };
+
+        // 모바일 브라우저의 '공유하기' 기능을 호출 (카톡 선택 가능)
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('공유 실패:', err);
+            }
         } else {
-            alert("카카오톡 앱이 설치된 모바일 기기에서 사용 가능합니다.");
+            // Web Share를 지원하지 않는 경우 (구형 폰 등) 예외 처리
+            const fallbackUrl = `https://sharer.kakao.com/talk/friends/picker/link?message=${encodeURIComponent(currentOrderText)}`;
+            window.open(fallbackUrl, '_blank');
         }
     }
 </script>
