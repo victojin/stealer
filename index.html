@@ -93,8 +93,8 @@
 </div>
 
 <script>
-    // 2026-02-20 발행된 신규 API URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbx530FKRMMFWYV7bY_sfzxQQZQTJJkEO0UzUSXEZJoTbpZCmtreDbWVgFbo7mfOuMQo/exec";
+    // 새로운 배포 URL 적용
+    const API_URL = "https://script.google.com/macros/s/AKfycbxribw45q4Z43CIkdx_fuqMUhMPXEwx7p8pHcN0oc7kGvPRGWcIJ-iIIU6fmzkvsR6OtQ/exec";
     
     const products = [
         { name: "MODEL 01 - BLACK", price: 185000, img: "https://via.placeholder.com/300?text=01" },
@@ -146,21 +146,31 @@
     function submitOrder() {
         currentBranch = document.getElementById('branchName').value;
         if(!currentBranch) return alert("지점명을 입력하세요.");
-        let details = [];
+        
+        let details = [];      // 화면/메일용 요약 텍스트
+        let splitItems = [];   // 시트 저장용 (모델:수량)
+        
         products.forEach((p, i) => {
             let q = document.getElementById(`qty_${i}`).value;
-            if(q > 0) details.push(`${p.name} : ${q}개`);
+            if(q > 0) {
+                details.push(`${p.name} : ${q}개`);
+                splitItems.push(`${p.name}:${q}`);
+            }
         });
+        
         if(details.length === 0) return alert("제품을 선택하세요.");
         
         currentOrderText = `[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
         
         document.getElementById('loader').style.display = 'flex';
 
+        // 서버로 전송할 데이터 구성 (시트 분리 기록용)
         const fd = new FormData();
         fd.append("action", "order");
         fd.append("branch", currentBranch);
-        fd.append("order", currentOrderText.replace(/\n/g, ", "));
+        fd.append("items", splitItems.join(",")); // 모델:수량,모델:수량...
+        fd.append("total", totalSum.toLocaleString() + "원");
+        fd.append("order", currentOrderText);
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
@@ -174,7 +184,7 @@
 
     function sendEmail() {
         const email = document.getElementById('userEmail').value;
-        if(!email.includes('@')) return alert("이메일을 정확히 입력해 주세요.");
+        if(!email.includes('@')) return alert("이메일을 확인해 주세요.");
         const btn = document.getElementById('emailBtn');
         btn.disabled = true; btn.innerText = "전송 중...";
 
@@ -186,7 +196,7 @@
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => { 
-            alert("주문서가 메일로 발송되었습니다."); 
+            alert("디자인 주문서가 발송되었습니다."); 
             btn.disabled = false; 
             btn.innerText = "이메일 전송하기"; 
         });
