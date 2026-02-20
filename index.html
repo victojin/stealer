@@ -28,12 +28,26 @@
         
         .qty-box { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .qty-btn { width: 34px; height: 34px; border: 1px solid #000; background: white; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
-        .qty-input { width: 35px; text-align: center; border: none; font-weight: bold; font-size: 17px; }
+        
+        /* 숫자 입력창 화살표 제거 */
+        .qty-input { 
+            width: 40px; 
+            text-align: center; 
+            border: none; 
+            font-weight: bold; 
+            font-size: 17px; 
+            background: transparent;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        .qty-input::-webkit-outer-spin-button,
+        .qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Chrome, Safari, Edge */
+            margin: 0;
+        }
 
         .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .email-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* 결과 페이지 상세 */
         .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; text-align: left; }
         .email-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
 
@@ -55,52 +69,48 @@
             <label>안경원 지점명</label>
             <input type="text" id="branchName" placeholder="지점명을 입력하세요" required>
         </div>
-        
         <div class="product-grid" id="productGrid"></div>
-        
         <button type="button" class="submit-btn" onclick="submitOrder()">주문 제출하기</button>
     </div>
 
     <div id="resultPage">
-        <h2 style="text-align: center; margin: 0;">주문이 접수되었습니다!</h2>
+        <h2 style="text-align: center; margin: 0;">주문 접수 완료</h2>
         <div class="summary-box" id="orderSummary"></div>
-        
         <div class="email-section">
-            <label>내역을 이메일로 보내기</label>
-            <input type="email" id="userEmail" placeholder="이메일 주소 입력">
-            <button type="button" class="email-btn" onclick="sendEmail()">이메일 전송하기</button>
+            <label>주문 내역 이메일로 받기</label>
+            <p style="font-size:11px; color:#4a90e2; margin:5px 0 10px;">* hello@stealer.co.kr로 참조 발송됩니다.</p>
+            <input type="email" id="userEmail" placeholder="example@email.com">
+            <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송하기</button>
         </div>
-        
         <button type="button" class="submit-btn" style="background:#666;" onclick="location.reload()">처음으로</button>
     </div>
 </div>
 
 <script>
+    // CC 기능이 포함된 앱스스크립트 URL 적용
     const API_URL = "https://script.google.com/macros/s/AKfycbyQTjQEPfzPCgg6U3bHbcYW22x9D4g9CGTZwsGsjmkf6uhEBiDMmYyB2rc-FDpfTVs-/exec";
     
-    // 제품 리스트 10종
     const products = [
-        { name: "MODEL A - BLACK", img: "https://via.placeholder.com/300?text=MODEL+A" },
-        { name: "MODEL B - SILVER", img: "https://via.placeholder.com/300?text=MODEL+B" },
-        { name: "MODEL C - GOLD", img: "https://via.placeholder.com/300?text=MODEL+C" },
-        { name: "MODEL D - KHAKI", img: "https://via.placeholder.com/300?text=MODEL+D" },
-        { name: "MODEL E - BROWN", img: "https://via.placeholder.com/300?text=MODEL+E" },
-        { name: "MODEL F - NAVY", img: "https://via.placeholder.com/300?text=MODEL+F" },
-        { name: "MODEL G - GREY", img: "https://via.placeholder.com/300?text=MODEL+G" },
-        { name: "MODEL H - MATTE", img: "https://via.placeholder.com/300?text=MODEL+H" },
-        { name: "MODEL I - ROSE", img: "https://via.placeholder.com/300?text=MODEL+I" },
-        { name: "MODEL J - CLEAR", img: "https://via.placeholder.com/300?text=MODEL+J" }
+        { name: "MODEL 01 - BLACK", img: "https://via.placeholder.com/300?text=MODEL+01" },
+        { name: "MODEL 02 - SILVER", img: "https://via.placeholder.com/300?text=MODEL+02" },
+        { name: "MODEL 03 - GOLD", img: "https://via.placeholder.com/300?text=MODEL+03" },
+        { name: "MODEL 04 - BRONZE", img: "https://via.placeholder.com/300?text=MODEL+04" },
+        { name: "MODEL 05 - GREY", img: "https://via.placeholder.com/300?text=MODEL+05" },
+        { name: "MODEL 06 - KHAKI", img: "https://via.placeholder.com/300?text=MODEL+06" },
+        { name: "MODEL 07 - NAVY", img: "https://via.placeholder.com/300?text=MODEL+07" },
+        { name: "MODEL 08 - CLEAR", img: "https://via.placeholder.com/300?text=MODEL+08" },
+        { name: "MODEL 09 - ROSE GOLD", img: "https://via.placeholder.com/300?text=MODEL+09" },
+        { name: "MODEL 10 - DARK GREY", img: "https://via.placeholder.com/300?text=MODEL+10" }
     ];
 
     let currentOrder = "";
     let currentBranch = "";
 
-    // 제품 리스트 화면 표시
     const grid = document.getElementById('productGrid');
     products.forEach((p, i) => {
         grid.innerHTML += `
             <div class="product-card">
-                <img src="${p.img}" alt="${p.name}">
+                <img src="${p.img}">
                 <div class="product-name">${p.name}</div>
                 <div class="qty-box">
                     <button type="button" class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
@@ -116,10 +126,9 @@
         if (v >= 0) input.value = v;
     }
 
-    // 1. 주문 데이터 제출
     function submitOrder() {
         currentBranch = document.getElementById('branchName').value;
-        if(!currentBranch) return alert("지점명을 입력해 주세요.");
+        if(!currentBranch) return alert("지점명을 입력하세요.");
 
         let details = [];
         products.forEach((p, i) => {
@@ -127,7 +136,7 @@
             if(q > 0) details.push(`${p.name} : ${q}개`);
         });
 
-        if(details.length === 0) return alert("최소 1개 이상의 수량을 선택하세요.");
+        if(details.length === 0) return alert("수량을 선택하세요.");
         currentOrder = details.join("\n");
 
         document.getElementById('loader').style.display = 'flex';
@@ -135,27 +144,24 @@
         const fd = new FormData();
         fd.append("action", "order");
         fd.append("branch", currentBranch);
-        fd.append("order", currentOrder.replace(/\n/g, ", ")); // 구글 시트에는 한 줄로 저장
+        fd.append("order", currentOrder.replace(/\n/g, ", "));
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('orderPage').classList.remove('active');
             document.getElementById('resultPage').classList.add('active');
-            document.getElementById('orderSummary').innerText = `[지점명]\n${currentBranch}\n\n[주문내역]\n${currentOrder}`;
-        })
-        .catch(err => {
-            document.getElementById('loader').style.display = 'none';
-            alert("전송 오류가 발생했습니다.");
+            document.getElementById('orderSummary').innerText = `[지점명] ${currentBranch}\n\n[주문내역]\n${currentOrder}`;
         });
     }
 
-    // 2. 이메일 발송 요청
     function sendEmail() {
         const email = document.getElementById('userEmail').value;
-        if(!email || !email.includes('@')) return alert("올바른 이메일 주소를 입력하세요.");
+        if(!email.includes('@')) return alert("이메일 주소를 정확히 입력하세요.");
 
-        document.getElementById('loader').style.display = 'flex';
+        const btn = document.getElementById('emailBtn');
+        btn.disabled = true;
+        btn.innerText = "전송 중...";
 
         const fd = new FormData();
         fd.append("action", "sendEmail");
@@ -165,12 +171,13 @@
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
-            document.getElementById('loader').style.display = 'none';
-            alert("입력하신 메일로 주문 내역이 발송되었습니다!");
+            alert("이메일 발송 완료! 본사(hello@stealer.co.kr)로도 참조되었습니다.");
+            btn.disabled = false;
+            btn.innerText = "이메일 전송하기";
         })
         .catch(err => {
-            document.getElementById('loader').style.display = 'none';
-            alert("메일 발송 중 오류가 발생했습니다.");
+            alert("전송 오류: " + err);
+            btn.disabled = false;
         });
     }
 </script>
