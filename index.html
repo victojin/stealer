@@ -38,6 +38,7 @@
         .kakao-btn { width: 100%; padding: 15px; background: var(--kakao); color: #3c1e1e; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; }
+        .contact-info { font-size: 11px; color: #888; text-align: center; margin-top: 15px; line-height: 1.6; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); color: white; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
     </style>
 </head>
@@ -58,7 +59,7 @@
 
     <div id="orderPage" class="active">
         <div class="form-group">
-            <label>안경원 지점명</label>
+            <label>지점명</label>
             <input type="text" id="branchName" placeholder="지점명을 입력하세요" required>
         </div>
         <div class="product-grid" id="productGrid"></div>
@@ -81,12 +82,19 @@
                 <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송하기</button>
             </div>
         </div>
+        
+        <div class="contact-info">
+            문의: 1588-4264<br>
+            hello@stealer.co.kr | hello@muzik.co.kr
+        </div>
+        
         <button type="button" class="submit-btn" style="background:#666; margin-top:20px;" onclick="location.reload()">새 주문 작성</button>
     </div>
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyQTjQEPfzPCgg6U3bHbcYW22x9D4g9CGTZwsGsjmkf6uhEBiDMmYyB2rc-FDpfTVs-/exec";
+    // 새로운 배포자 URL 적용
+    const API_URL = "https://script.google.com/macros/s/AKfycbyy1oU5lfbYtxZwRGc2ZrRzLU4idMaeMeq3NwpJMDS6OyTalpRjJVt49RtQxuJvYzNZfg/exec";
     
     const products = [
         { name: "MODEL 01 - BLACK", price: 185000, img: "https://via.placeholder.com/300?text=01" },
@@ -179,22 +187,11 @@
         .then(() => { alert("메일 발송 완료!"); btn.disabled = false; btn.innerText = "이메일 전송하기"; });
     }
 
-    // ★ 카카오톡 즉시 공유 함수 (Web Share API 사용) ★
     async function shareKakao() {
-        const shareData = {
-            title: 'STEALER 주문서',
-            text: currentOrderText
-        };
-
-        // 모바일 브라우저의 '공유하기' 기능을 호출 (카톡 선택 가능)
+        const shareData = { title: 'STEALER 주문서', text: currentOrderText };
         if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.log('공유 실패:', err);
-            }
+            try { await navigator.share(shareData); } catch (err) {}
         } else {
-            // Web Share를 지원하지 않는 경우 (구형 폰 등) 예외 처리
             const fallbackUrl = `https://sharer.kakao.com/talk/friends/picker/link?message=${encodeURIComponent(currentOrderText)}`;
             window.open(fallbackUrl, '_blank');
         }
