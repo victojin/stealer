@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEALER 수주회 주문</title>
     <style>
-        :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; color: #333; }
+        :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; --price-color: #e63946; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px 15px 100px 15px; color: #333; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         h1 { font-size: 24px; letter-spacing: 4px; margin: 0; font-weight: 800; }
-        p { color: #666; font-size: 12px; margin-top: 5px; }
-
-        /* 페이지 전환 섹션 */
+        
         #orderPage, #resultPage { display: none; }
         .active { display: block !important; }
 
@@ -22,41 +20,44 @@
         input[type="text"], input[type="email"] { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
 
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; }
+        .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; position: relative; }
         .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #f9f9f9; }
-        .product-name { font-size: 13px; font-weight: 600; margin-bottom: 10px; height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .product-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .product-price { font-size: 14px; color: var(--price-color); font-weight: bold; margin-bottom: 10px; }
         
         .qty-box { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .qty-btn { width: 34px; height: 34px; border: 1px solid #000; background: white; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
         
-        /* 숫자 입력창 화살표 제거 */
         .qty-input { 
-            width: 40px; 
-            text-align: center; 
-            border: none; 
-            font-weight: bold; 
-            font-size: 17px; 
-            background: transparent;
-            -moz-appearance: textfield; /* Firefox */
+            width: 40px; text-align: center; border: none; font-weight: bold; font-size: 17px; background: transparent;
+            -moz-appearance: textfield;
         }
-        .qty-input::-webkit-outer-spin-button,
-        .qty-input::-webkit-inner-spin-button {
-            -webkit-appearance: none; /* Chrome, Safari, Edge */
-            margin: 0;
-        }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* 하단 고정 합계 바 */
+        .total-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #000; color: #fff;
+            padding: 20px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;
+            z-index: 999; box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        .total-label { font-size: 14px; opacity: 0.8; }
+        .total-amount { font-size: 20px; font-weight: bold; }
+
+        .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .email-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; text-align: left; }
-        .email-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-
+        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); color: white; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="loader">처리 중입니다...</div>
+
+<div id="stickyTotal" class="total-bar active">
+    <span class="total-label">총 주문 합계</span>
+    <span class="total-amount" id="displayTotal">0원</span>
+</div>
 
 <div class="container">
     <header>
@@ -76,35 +77,35 @@
     <div id="resultPage">
         <h2 style="text-align: center; margin: 0;">주문 접수 완료</h2>
         <div class="summary-box" id="orderSummary"></div>
-        <div class="email-section">
-            <label>주문 내역 이메일로 받기</label>
-            <p style="font-size:11px; color:#4a90e2; margin:5px 0 10px;">* hello@stealer.co.kr로 참조 발송됩니다.</p>
+        <div style="margin-top:30px; border-top:1px solid #eee; padding-top:20px;">
+            <label>이메일로 내역 받기</label>
             <input type="email" id="userEmail" placeholder="example@email.com">
             <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송하기</button>
         </div>
-        <button type="button" class="submit-btn" style="background:#666;" onclick="location.reload()">처음으로</button>
+        <button type="button" class="submit-btn" style="background:#666; margin-top:10px;" onclick="location.reload()">처음으로</button>
     </div>
 </div>
 
 <script>
-    // CC 기능이 포함된 앱스스크립트 URL 적용
     const API_URL = "https://script.google.com/macros/s/AKfycbyQTjQEPfzPCgg6U3bHbcYW22x9D4g9CGTZwsGsjmkf6uhEBiDMmYyB2rc-FDpfTVs-/exec";
     
+    // 제품 데이터 (가격 포함)
     const products = [
-        { name: "MODEL 01 - BLACK", img: "https://via.placeholder.com/300?text=MODEL+01" },
-        { name: "MODEL 02 - SILVER", img: "https://via.placeholder.com/300?text=MODEL+02" },
-        { name: "MODEL 03 - GOLD", img: "https://via.placeholder.com/300?text=MODEL+03" },
-        { name: "MODEL 04 - BRONZE", img: "https://via.placeholder.com/300?text=MODEL+04" },
-        { name: "MODEL 05 - GREY", img: "https://via.placeholder.com/300?text=MODEL+05" },
-        { name: "MODEL 06 - KHAKI", img: "https://via.placeholder.com/300?text=MODEL+06" },
-        { name: "MODEL 07 - NAVY", img: "https://via.placeholder.com/300?text=MODEL+07" },
-        { name: "MODEL 08 - CLEAR", img: "https://via.placeholder.com/300?text=MODEL+08" },
-        { name: "MODEL 09 - ROSE GOLD", img: "https://via.placeholder.com/300?text=MODEL+09" },
-        { name: "MODEL 10 - DARK GREY", img: "https://via.placeholder.com/300?text=MODEL+10" }
+        { name: "MODEL 01 - BLACK", price: 185000, img: "https://via.placeholder.com/300?text=01" },
+        { name: "MODEL 02 - SILVER", price: 195000, img: "https://via.placeholder.com/300?text=02" },
+        { name: "MODEL 03 - GOLD", price: 195000, img: "https://via.placeholder.com/300?text=03" },
+        { name: "MODEL 04 - BRONZE", price: 185000, img: "https://via.placeholder.com/300?text=04" },
+        { name: "MODEL 05 - GREY", price: 210000, img: "https://via.placeholder.com/300?text=05" },
+        { name: "MODEL 06 - KHAKI", price: 210000, img: "https://via.placeholder.com/300?text=06" },
+        { name: "MODEL 07 - NAVY", price: 185000, img: "https://via.placeholder.com/300?text=07" },
+        { name: "MODEL 08 - CLEAR", price: 175000, img: "https://via.placeholder.com/300?text=08" },
+        { name: "MODEL 09 - ROSE GOLD", price: 195000, img: "https://via.placeholder.com/300?text=09" },
+        { name: "MODEL 10 - DARK GREY", price: 185000, img: "https://via.placeholder.com/300?text=10" }
     ];
 
-    let currentOrder = "";
+    let currentOrderText = "";
     let currentBranch = "";
+    let totalSum = 0;
 
     const grid = document.getElementById('productGrid');
     products.forEach((p, i) => {
@@ -112,6 +113,7 @@
             <div class="product-card">
                 <img src="${p.img}">
                 <div class="product-name">${p.name}</div>
+                <div class="product-price">${p.price.toLocaleString()}원</div>
                 <div class="qty-box">
                     <button type="button" class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
                     <input type="number" id="qty_${i}" class="qty-input" value="0" readonly>
@@ -123,7 +125,19 @@
     function updateQty(i, d) {
         const input = document.getElementById(`qty_${i}`);
         let v = parseInt(input.value) + d;
-        if (v >= 0) input.value = v;
+        if (v >= 0) {
+            input.value = v;
+            calculateTotal();
+        }
+    }
+
+    function calculateTotal() {
+        totalSum = 0;
+        products.forEach((p, i) => {
+            const q = parseInt(document.getElementById(`qty_${i}`).value);
+            totalSum += p.price * q;
+        });
+        document.getElementById('displayTotal').innerText = totalSum.toLocaleString() + "원";
     }
 
     function submitOrder() {
@@ -133,31 +147,34 @@
         let details = [];
         products.forEach((p, i) => {
             let q = document.getElementById(`qty_${i}`).value;
-            if(q > 0) details.push(`${p.name} : ${q}개`);
+            if(q > 0) {
+                details.push(`${p.name} (${p.price.toLocaleString()}원) x ${q}개 = ${(p.price * q).toLocaleString()}원`);
+            }
         });
 
         if(details.length === 0) return alert("수량을 선택하세요.");
-        currentOrder = details.join("\n");
+        currentOrderText = details.join("\n") + `\n\n총 합계: ${totalSum.toLocaleString()}원`;
 
         document.getElementById('loader').style.display = 'flex';
 
         const fd = new FormData();
         fd.append("action", "order");
         fd.append("branch", currentBranch);
-        fd.append("order", currentOrder.replace(/\n/g, ", "));
+        fd.append("order", currentOrderText.replace(/\n/g, ", "));
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
             document.getElementById('loader').style.display = 'none';
+            document.getElementById('stickyTotal').style.display = 'none'; // 결과페이지에선 바 숨김
             document.getElementById('orderPage').classList.remove('active');
             document.getElementById('resultPage').classList.add('active');
-            document.getElementById('orderSummary').innerText = `[지점명] ${currentBranch}\n\n[주문내역]\n${currentOrder}`;
+            document.getElementById('orderSummary').innerText = `[지점명] ${currentBranch}\n\n[주문내역]\n${currentOrderText}`;
         });
     }
 
     function sendEmail() {
         const email = document.getElementById('userEmail').value;
-        if(!email.includes('@')) return alert("이메일 주소를 정확히 입력하세요.");
+        if(!email.includes('@')) return alert("이메일을 정확히 입력하세요.");
 
         const btn = document.getElementById('emailBtn');
         btn.disabled = true;
@@ -167,17 +184,13 @@
         fd.append("action", "sendEmail");
         fd.append("email", email);
         fd.append("branch", currentBranch);
-        fd.append("order", currentOrder);
+        fd.append("order", currentOrderText);
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
-            alert("이메일 발송 완료! 본사(hello@stealer.co.kr)로도 참조되었습니다.");
+            alert("메일 전송 완료! 본사 참조 메일도 확인해 보세요.");
             btn.disabled = false;
             btn.innerText = "이메일 전송하기";
-        })
-        .catch(err => {
-            alert("전송 오류: " + err);
-            btn.disabled = false;
         });
     }
 </script>
