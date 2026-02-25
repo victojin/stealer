@@ -3,58 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STEALER 수주회 주문</title>
+    <title>STEALER / muzik 제품 주문</title>
     <style>
-        :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; --kakao: #fee500; --price-color: #e63946; }
+        :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; --kakao: #fee500; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px 15px 120px 15px; color: #333; }
         .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-        h1 { font-size: 24px; letter-spacing: 4px; margin: 0; font-weight: 800; }
+        h1 { font-size: 20px; letter-spacing: 1px; margin: 0; font-weight: 800; }
         
         #orderPage, #resultPage { display: none; }
         .active { display: block !important; }
 
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-        input[type="text"], input[type="email"] { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="text"], input[type="tel"], input[type="email"] { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+
+        .category-title { grid-column: span 2; background: #f8f8f8; padding: 10px; margin-top: 20px; font-weight: bold; font-size: 14px; border-left: 4px solid #000; }
 
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; }
-        .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; margin-bottom: 10px; background: #f9f9f9; }
-        .product-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-        .product-price { font-size: 14px; color: var(--price-color); font-weight: bold; margin-bottom: 10px; }
+        .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        /* 정방형 프레임 이미지 설정 */
+        .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; margin-bottom: 10px; border-radius: 6px; }
+        .img-container img { width: 100%; height: 100%; object-fit: contain; }
+        
+        .product-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; min-height: 30px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .product-price { font-size: 11px; color: #888; margin-bottom: 10px; }
         
         .qty-box { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .qty-btn { width: 34px; height: 34px; border: 1px solid #000; background: white; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
         .qty-input { width: 40px; text-align: center; border: none; font-weight: bold; font-size: 17px; background: transparent; -moz-appearance: textfield; }
         .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; color: #fff; padding: 20px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 999; }
-        .total-amount { font-size: 20px; font-weight: bold; }
+        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; color: #fff; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; text-align: center; z-index: 999; }
+        .total-label { font-size: 13px; opacity: 0.8; margin-bottom: 5px; }
+        .total-amount { font-size: 22px; font-weight: bold; }
 
         .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .email-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .kakao-btn { width: 100%; padding: 15px; background: var(--kakao); color: #3c1e1e; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; }
-        .contact-info { font-size: 11px; color: #888; text-align: center; margin-top: 15px; line-height: 1.6; }
+        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+        .contact-footer { font-size: 11px; color: #888; text-align: center; margin-top: 15px; line-height: 1.6; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); color: white; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="loader">처리 중입니다...</div>
+<div id="loader">주문을 처리 중입니다...</div>
 
 <div id="stickyTotal" class="total-bar">
-    <span style="font-size:14px; opacity:0.8;">총 주문 합계</span>
+    <span class="total-label">총 주문 합계</span>
     <span class="total-amount" id="displayTotal">0원</span>
 </div>
 
 <div class="container">
     <header>
-        <h1>STEALER</h1>
-        <p>2026 TRUNK SHOW ORDER</p>
+        <h1>STEALER / muzik 제품 주문</h1>
     </header>
 
     <div id="orderPage" class="active">
@@ -62,6 +68,11 @@
             <label>지점명</label>
             <input type="text" id="branchName" placeholder="지점명을 입력하세요" required>
         </div>
+        <div class="form-group">
+            <label>연락처</label>
+            <input type="tel" id="contactNum" placeholder="연락처를 입력하세요" required>
+        </div>
+        
         <div class="product-grid" id="productGrid"></div>
         <button type="button" class="submit-btn" onclick="submitOrder()">주문 제출하기</button>
     </div>
@@ -70,54 +81,70 @@
         <h2 style="text-align: center; margin: 0;">주문 접수 완료</h2>
         <div class="summary-box" id="orderSummary"></div>
         
-        <div style="margin-top:20px;">
-            <button type="button" class="kakao-btn" onclick="shareKakao()">
-                <img src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_small.png" width="20">
-                카카오톡으로 바로 공유
-            </button>
-            
-            <div style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
-                <label>이메일로 내역 받기</label>
-                <input type="email" id="userEmail" placeholder="example@email.com">
-                <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송하기</button>
-            </div>
+        <button type="button" class="kakao-btn" onclick="shareNative()">카카오톡 공유</button>
+        
+        <div style="margin-top:25px; border-top:1px solid #eee; padding-top:20px;">
+            <label>이메일 주문서 받기</label>
+            <input type="email" id="userEmail" placeholder="example@email.com">
+            <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송</button>
         </div>
         
-        <div class="contact-info">
+        <div class="contact-footer">
             문의: 1588-4264<br>
             hello@stealer.co.kr | hello@muzik.co.kr
         </div>
-        
-        <button type="button" class="submit-btn" style="background:#666; margin-top:20px;" onclick="location.reload()">새 주문 작성</button>
     </div>
 </div>
 
 <script>
-    // 2026-02-20 발행된 병합 기능 포함 신규 URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbzlMFUYxCMQE_LebutsXN_1-EtOstukCoULW1vOvQ4pVNPygDeZIYvl21DKlGDxVdWXhg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwpO4gX_LTftiU2zjlAKA5Gv1HBDneHN2kzWMpbUMQQy6VBJ4COTXivKrB2uTZ0yOeDQQ/exec";
     
     const products = [
-        { name: "MODEL 01 - BLACK", price: 185000, img: "https://via.placeholder.com/300?text=01" },
-        { name: "MODEL 02 - SILVER", price: 195000, img: "https://via.placeholder.com/300?text=02" },
-        { name: "MODEL 03 - GOLD", price: 195000, img: "https://via.placeholder.com/300?text=03" },
-        { name: "MODEL 04 - BRONZE", price: 185000, img: "https://via.placeholder.com/300?text=04" },
-        { name: "MODEL 05 - GREY", price: 210000, img: "https://via.placeholder.com/300?text=05" },
-        { name: "MODEL 06 - KHAKI", price: 210000, img: "https://via.placeholder.com/300?text=06" },
-        { name: "MODEL 07 - NAVY", price: 185000, img: "https://via.placeholder.com/300?text=07" },
-        { name: "MODEL 08 - CLEAR", price: 175000, img: "https://via.placeholder.com/300?text=08" },
-        { name: "MODEL 09 - ROSE GOLD", price: 195000, img: "https://via.placeholder.com/300?text=09" },
-        { name: "MODEL 10 - DARK GREY", price: 185000, img: "https://via.placeholder.com/300?text=10" }
+        { cat: "[스틸러 X 페이커]", name: "챔피언 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/75c18dfa480693041fde4faa062c0ad5.jpg" },
+        { name: "챔피언 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/da971c987d88b5b3ffbf992c8639b7b8.jpg" },
+        { name: "챔피언 STL29", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/16277d1cf8a1275abb02b41c0dd3c303.jpg" },
+        { name: "갓 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/861cccd3945f90009943027d3317c54d.jpg" },
+        { name: "갓 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/90eb64fc8d697a12356bc6aa22a5643d.jpg" },
+        { name: "갓 STL08", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/791503ad39151ff416caf7265ce4305a.jpg" },
+        { name: "이터널 STL01", price: 128000, img: "https://stealer.co.kr/web/product/small/202411/ce943b8c04f0b44f210782666a7b34b6.jpg" },
+        { name: "이터널 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/afbc6515f53980ee99b7227a4e7c7137.jpg" },
+        { name: "이터널 STL28", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/402640e623db77e64f7ff3430b9fb4d8.jpg" },
+        { name: "티탄 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/b2ec96e7764b69293221ea434acf391c.jpg" },
+        { name: "티탄 STL02", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/602da9b3c6869e32a6794cde67e6500b.jpg" },
+        { name: "티탄 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/2a2b197d7d20176cf0df80aac9c6057a.jpg" },
+        { name: "레전드 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/f4e6ea37ddc32160fe2d2ba16652817a.jpg" },
+        { name: "레전드 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/4542fd7c2f3173c73fe5f7c2103c1920.jpg" },
+        { name: "레전드 STL29", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/20ecba971e92aaa2922cc145425a9270.jpg" },
+        { name: "피닉스 STL01", price: 140000, img: "https://stealer.co.kr/web/product/tiny/202408/b77b5bebec8a10473aa59e194c94c633.jpg" },
+        
+        { cat: "[뮤지크 X 코카-콜라]", name: "칙 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/21f0ea3e0d2d1ed82442d1cfa022149b.png" },
+        { name: "칙 track.9", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/0957dc0ed8316f973b1d82779044dac3.png" },
+        { name: "팅탱 track.B", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a1801e5141be283862a297d5c64a8b73.png" },
+        { name: "팅탱 track.S", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a00d12e149fadef5a289921e5bf123e1.png" },
+        { name: "팅탱 track.G", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/62c275ea2d798c64d9b9b4df9c0034c8.png" },
+        { name: "브르르 track.29", price: 110000, img: "https://muzik.co.kr/web/product/medium/202503/fa5c5fa7f9591c89a164b82d58fae7a7.png" },
+        { name: "푸쉬 track.B", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/c4ce3571205530de6e622a3f51fb852c.png" },
+        { name: "푸쉬 track.S", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/4e1474dfb1c034f98c9b530a407963fc.png" },
+        { name: "푸쉬 track.G", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/4e1474dfb1c034f98c9b530a407963fc.png" },
+        { name: "프리즈 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/63a4c8d2cdb3c6c18ea7e579a3240db8.png" },
+        { name: "프리즈 track.1(Y/T)", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/68de9a8cc7c7829dd309c2c023251155.png" },
+        { name: "프리즈 track.38", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/0d530e801e9ce94895c7fc55003048a8.png" },
+        { name: "팝팝 track.1", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/c66955fcdd45605946c8c82945f50d3e.png" },
+        { name: "팝팝 track.3", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a33cd7e262dd886889677e38fd13691a.png" },
+        { name: "팝팝 track.6", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/42553f4486a3c2917ba3e1472cc37105.png" },
+        { name: "걸프 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/5d683bedbd30e964906a4f1dde58a3ee.png" },
+        { name: "걸프 track.3", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/b6cfe0270899844a762cfa8aa1c1f673.png" },
+        { name: "걸프 track.38", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/c42dab4fa6051543ed6e707cb9a11026.png" }
     ];
 
-    let currentOrderText = "";
-    let currentBranch = "";
     let totalSum = 0;
-
     const grid = document.getElementById('productGrid');
+
     products.forEach((p, i) => {
+        if(p.cat) grid.innerHTML += `<div class="category-title">${p.cat}</div>`;
         grid.innerHTML += `
             <div class="product-card">
-                <img src="${p.img}">
+                <div class="img-container"><img src="${p.img}"></div>
                 <div class="product-name">${p.name}</div>
                 <div class="product-price">${p.price.toLocaleString()}원</div>
                 <div class="qty-box">
@@ -144,12 +171,11 @@
     }
 
     function submitOrder() {
-        currentBranch = document.getElementById('branchName').value;
-        if(!currentBranch) return alert("지점명을 입력하세요.");
+        const branch = document.getElementById('branchName').value;
+        const contact = document.getElementById('contactNum').value;
+        if(!branch || !contact) return alert("지점명과 연락처를 입력하세요.");
         
-        let details = [];      
-        let splitItems = [];   
-        
+        let details = []; let splitItems = [];   
         products.forEach((p, i) => {
             let q = document.getElementById(`qty_${i}`).value;
             if(q > 0) {
@@ -157,19 +183,17 @@
                 splitItems.push(`${p.name}:${q}`);
             }
         });
+        if(details.length === 0) return alert("수량을 선택하세요.");
         
-        if(details.length === 0) return alert("제품을 선택하세요.");
-        
-        currentOrderText = `[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
+        const summaryText = `[지점명] ${branch}\n[연락처] ${contact}\n\n[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
         
         document.getElementById('loader').style.display = 'flex';
-
         const fd = new FormData();
         fd.append("action", "order");
-        fd.append("branch", currentBranch);
+        fd.append("branch", branch + " / " + contact);
         fd.append("items", splitItems.join(",")); 
         fd.append("total", totalSum.toLocaleString() + "원");
-        fd.append("order", currentOrderText);
+        fd.append("order", summaryText);
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
         .then(() => {
@@ -177,37 +201,33 @@
             document.getElementById('stickyTotal').style.display = 'none';
             document.getElementById('orderPage').classList.remove('active');
             document.getElementById('resultPage').classList.add('active');
-            document.getElementById('orderSummary').innerText = `[지점명] ${currentBranch}\n\n${currentOrderText}`;
+            document.getElementById('orderSummary').innerText = summaryText;
+            window.scrollTo(0,0);
         });
     }
 
     function sendEmail() {
         const email = document.getElementById('userEmail').value;
-        if(!email.includes('@')) return alert("이메일을 정확히 입력해 주세요.");
+        if(!email.includes('@')) return alert("이메일을 확인하세요.");
         const btn = document.getElementById('emailBtn');
         btn.disabled = true; btn.innerText = "전송 중...";
 
         const fd = new FormData();
         fd.append("action", "sendEmail");
         fd.append("email", email);
-        fd.append("branch", currentBranch);
-        fd.append("order", currentOrderText);
+        fd.append("branch", document.getElementById('branchName').value);
+        fd.append("order", document.getElementById('orderSummary').innerText);
 
         fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
-        .then(() => { 
-            alert("주문서가 메일로 발송되었습니다."); 
-            btn.disabled = false; 
-            btn.innerText = "이메일 전송하기"; 
-        });
+        .then(() => { alert("전송 완료!"); btn.disabled = false; btn.innerText = "이메일 전송"; });
     }
 
-    async function shareKakao() {
-        const shareData = { title: 'STEALER 주문서', text: `[지점명] ${currentBranch}\n\n${currentOrderText}` };
+    function shareNative() {
+        const text = document.getElementById('orderSummary').innerText;
         if (navigator.share) {
-            try { await navigator.share(shareData); } catch (err) {}
+            navigator.share({ title: '주문내역', text: text }).catch(()=>{});
         } else {
-            const fallbackUrl = `https://sharer.kakao.com/talk/friends/picker/link?message=${encodeURIComponent(shareData.text)}`;
-            window.open(fallbackUrl, '_blank');
+            alert("내역을 복사하여 전달해주세요.");
         }
     }
 </script>
