@@ -5,107 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STEALER / muzik 제품 주문</title>
     <style>
-        :root { --main-color: #000; --bg-color: #f2f2f2; --accent: #4a90e2; --kakao: #fee500; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px 15px 120px 15px; color: #333; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-        h1 { font-size: 20px; letter-spacing: 1px; margin: 0; font-weight: 800; }
+        :root { --main-color: #000; --bg-color: #f2f2f2; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: #333; }
+        
+        /* 헤더 상단 고정 */
+        header { text-align: center; background: #fff; padding: 15px 0; border-bottom: 2px solid #000; position: sticky; top: 0; z-index: 1000; }
+        header h1 { font-size: 18px; letter-spacing: 1px; margin: 0; font-weight: 800; }
+
+        /* 브랜드 탭 상단 고정 */
+        .brand-tabs { 
+            display: flex; gap: 10px; background: #fff; padding: 10px 15px; 
+            position: sticky; top: 51px; z-index: 999; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tab-btn { flex: 1; padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; color: #888; }
+        .tab-btn.active { background: #000; color: #fff; border-color: #000; }
+
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; min-height: 100vh; box-sizing: border-box; }
+        
         #orderPage, #resultPage { display: none; }
         .active { display: block !important; }
-        .form-group { margin-bottom: 15px; }
+
+        /* 폼 요소 */
+        .form-group { margin: 15px 0; text-align: left; }
         label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-        input[type="text"], input[type="tel"], input[type="email"] { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .category-title { grid-column: span 2; background: #f8f8f8; padding: 10px; margin-top: 20px; font-weight: bold; font-size: 14px; border-left: 4px solid #000; }
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        input[type="text"], input[type="tel"] { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+
+        /* 제품 그리드 및 하단 버튼 가림 방지 여백 */
+        .product-grid { display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .product-grid.show { display: grid; }
+        
+        /* 주문하기 버튼 하단 공간 확보 (매우 중요) */
+        #orderPage { padding-bottom: 160px; text-align: center; } 
+
         .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; display: flex; flex-direction: column; justify-content: space-between; }
         .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; margin-bottom: 10px; border-radius: 6px; cursor: pointer; }
-        .img-container img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s; }
-        .img-container:active img { transform: scale(0.95); }
+        .img-container img { width: 100%; height: 100%; object-fit: contain; }
         .product-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; min-height: 30px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .product-price { font-size: 11px; color: #888; margin-bottom: 10px; }
         
-        /* 수량 조절 박스 */
+        /* 수량 조절 */
         .qty-box { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .qty-btn { width: 34px; height: 34px; border: 1px solid #000; background: white; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        .qty-input { width: 35px; text-align: center; border: none; font-weight: bold; font-size: 16px; background: transparent; -moz-appearance: textfield; }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* 하단 합계 바 - 완벽 중앙 정렬 */
+        .total-bar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: #000; color: #fff; padding: 15px 0; 
+            box-sizing: border-box; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            text-align: center; z-index: 1001; 
+        }
+        .total-label { font-size: 11px; opacity: 0.7; margin-bottom: 2px; width: 100%; text-align: center; }
+        .total-amount { font-size: 22px; font-weight: bold; width: 100%; text-align: center; }
+
+        /* 제출 버튼 */
+        .submit-btn { 
+            width: 100%; padding: 18px; background: #000; color: white; 
+            border: none; border-radius: 8px; font-size: 16px; 
+            font-weight: bold; cursor: pointer; margin-top: 30px;
+        }
         
-        /* 숫자 입력란 화살표 제거 */
-        .qty-input { width: 40px; text-align: center; border: none; font-weight: bold; font-size: 17px; background: transparent; -moz-appearance: textfield; }
-        .qty-input::-webkit-outer-spin-button,
-        .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; color: #fff; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; text-align: center; z-index: 999; }
-        .total-label { font-size: 13px; opacity: 0.8; margin-bottom: 5px; }
-        .total-amount { font-size: 22px; font-weight: bold; }
-        .submit-btn { width: 100%; padding: 18px; background: var(--main-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .email-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .kakao-btn { width: 100%; padding: 15px; background: var(--kakao); color: #3c1e1e; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
-        .contact-footer { font-size: 11px; color: #888; text-align: center; margin-top: 15px; line-height: 1.6; }
-        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; text-align: center; }
-
-        /* 이미지 확대 모달 */
-        #imageModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; cursor: zoom-out; }
-        #imageModal img { max-width: 95%; max-height: 80%; border-radius: 5px; }
-        .modal-close-tip { position: absolute; bottom: 30px; color: #fff; font-size: 13px; opacity: 0.7; }
+        /* 모달 및 로더 */
+        #imageModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        #imageModal img { max-width: 95%; max-height: 80%; }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; }
+        .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; text-align: left; }
     </style>
 </head>
 <body>
 
-<div id="imageModal" onclick="closeModal()">
-    <img id="modalImg" src="">
-    <div class="modal-close-tip">닫으려면 화면을 터치하세요</div>
-</div>
+<div id="imageModal" onclick="this.style.display='none'"><img id="modalImg" src=""></div>
+<div id="loader"><div id="loaderText">데이터 로딩 중...</div></div>
 
-<div id="loader">
-    <div id="loaderText">데이터를 불러오는 중...</div>
-</div>
-
-<div id="stickyTotal" class="total-bar">
-    <span class="total-label">총 주문 합계</span>
-    <span class="total-amount" id="displayTotal">0원</span>
-</div>
+<header><h1>STEALER / muzik 주문</h1></header>
 
 <div class="container">
-    <header>
-        <h1>STEALER / muzik 제품 주문</h1>
-    </header>
-
     <div id="orderPage" class="active">
         <div class="form-group">
             <label>지점명</label>
-            <input type="text" id="branchName" placeholder="지점명을 입력하세요" required>
+            <input type="text" id="branchName" placeholder="지점명 입력">
         </div>
         <div class="form-group">
             <label>연락처</label>
-            <input type="tel" id="contactNum" placeholder="연락처를 입력하세요" required>
+            <input type="tel" id="contactNum" placeholder="연락처 입력">
+        </div>
+
+        <div class="brand-tabs">
+            <button class="tab-btn active" id="btn-STEALER" onclick="switchBrand('STEALER')">STEALER</button>
+            <button class="tab-btn" id="btn-muzik" onclick="switchBrand('muzik')">muzik</button>
         </div>
         
-        <div class="product-grid" id="productGrid"></div>
+        <div id="grid-STEALER" class="product-grid show"></div>
+        <div id="grid-muzik" class="product-grid"></div>
+
         <button type="button" class="submit-btn" onclick="submitOrder()">주문 제출하기</button>
     </div>
 
     <div id="resultPage">
-        <h2 style="text-align: center; margin: 0;">주문 접수 완료</h2>
+        <h2 style="text-align:center;">주문 완료</h2>
         <div class="summary-box" id="orderSummary"></div>
-        <button type="button" class="kakao-btn" onclick="shareNative()">공유하기</button>
-        <div style="margin-top:25px; border-top:1px solid #eee; padding-top:20px;">
-            <label>이메일 주문서 받기</label>
-            <input type="email" id="userEmail" placeholder="example@email.com">
-            <button type="button" class="email-btn" id="emailBtn" onclick="sendEmail()">이메일 전송</button>
-        </div>
-        <div class="contact-footer">문의: 1588-4264<br>hello@stealer.co.kr | hello@muzik.co.kr</div>
+        <button type="button" class="submit-btn" style="background:#fee500; color:#3c1e1e;" onclick="shareNative()">공유하기</button>
+        <button type="button" class="submit-btn" style="background:#4a90e2;" onclick="location.reload()">새 주문 작성</button>
     </div>
 </div>
 
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbygdPj4U8pbymPUBsCGI2WKWq848Y_FX3b_PP08yvXJ5hfOSPZ8AC_FG9aUFPVEBVtfwA/exec";
-    
-    let products = [];
-    let totalSum = 0;
+<div id="stickyTotal" class="total-bar">
+    <div class="total-label">전체 브랜드 합산 금액</div>
+    <div class="total-amount" id="displayTotal">0원</div>
+</div>
 
-    window.onload = function() {
-        loadData();
-    };
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyG2k1g3YzMPrBKGjuvqpL0Fhkr3aFjvteI_nZAHOZUxJug3rD2Ij4QF2yb5KLtxedglg/exec";
+    let products = [];
+    let orderQty = {}; 
+
+    window.onload = loadData;
 
     function loadData() {
         document.getElementById('loader').style.display = 'flex';
@@ -113,120 +131,113 @@
             .then(res => res.json())
             .then(data => {
                 products = data;
-                renderProducts();
+                renderGrids();
                 document.getElementById('loader').style.display = 'none';
             })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('loaderText').innerHTML = "데이터 로드 실패<br><button onclick='location.reload()'>다시 시도</button>";
-            });
+            .catch(() => alert("데이터 로드 실패"));
     }
 
-    function renderProducts() {
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = '';
-        products.forEach((p, i) => {
-            if(p.cat) grid.innerHTML += `<div class="category-title">${p.cat}</div>`;
-            grid.innerHTML += `
+    function renderGrids() {
+        const stealerGrid = document.getElementById('grid-STEALER');
+        const muzikGrid = document.getElementById('grid-muzik');
+        stealerGrid.innerHTML = ''; muzikGrid.innerHTML = '';
+        
+        products.forEach((p) => {
+            const brandKey = p.brand ? p.brand.toLowerCase() : 'stealer';
+            const targetGrid = (brandKey === 'muzik') ? muzikGrid : stealerGrid;
+            orderQty[p.name] = orderQty[p.name] || 0;
+
+            targetGrid.innerHTML += `
                 <div class="product-card">
                     <div class="img-container" onclick="openModal('${p.img}')">
-                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                        <img src="${p.img}" onerror="this.src='https://via.placeholder.com/150'">
                     </div>
                     <div class="product-name">${p.name}</div>
                     <div class="product-price">${p.price}</div>
                     <div class="qty-box">
-                        <button type="button" class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
-                        <input type="number" id="qty_${i}" class="qty-input" value="0" readonly>
-                        <button type="button" class="qty-btn" onclick="updateQty(${i}, 1)">+</button>
+                        <button class="qty-btn" onclick="updateQty('${p.name}', -1)">-</button>
+                        <input type="number" id="qty_${p.name}" class="qty-input" value="${orderQty[p.name]}" readonly>
+                        <button class="qty-btn" onclick="updateQty('${p.name}', 1)">+</button>
                     </div>
                 </div>`;
         });
     }
 
-    function openModal(imgSrc) {
-        if(!imgSrc || imgSrc.includes('placeholder')) return;
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImg');
-        modalImg.src = imgSrc;
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+    function switchBrand(brand) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + brand).classList.add('active');
+        document.getElementById('grid-STEALER').classList.toggle('show', brand === 'STEALER');
+        document.getElementById('grid-muzik').classList.toggle('show', brand === 'muzik');
+        window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
-    function closeModal() {
-        document.getElementById('imageModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function updateQty(i, d) {
-        const input = document.getElementById(`qty_${i}`);
-        let v = parseInt(input.value) + d;
-        if (v >= 0) { input.value = v; calculateTotal(); }
+    function updateQty(name, d) {
+        let current = orderQty[name] || 0;
+        let next = current + d;
+        if (next >= 0) {
+            orderQty[name] = next;
+            const input = document.getElementById(`qty_${name}`);
+            if(input) input.value = next;
+            calculateTotal();
+        }
     }
 
     function calculateTotal() {
-        totalSum = 0;
-        products.forEach((p, i) => {
-            const q = parseInt(document.getElementById(`qty_${i}`).value) || 0;
-            const numericPrice = parseInt(p.price.replace(/[^0-9]/g, "")) || 0;
-            totalSum += (numericPrice * q);
+        let total = 0;
+        products.forEach(p => {
+            const q = orderQty[p.name] || 0;
+            const price = parseInt(p.price.replace(/[^0-9]/g, "")) || 0;
+            total += (price * q);
         });
-        document.getElementById('displayTotal').innerText = totalSum.toLocaleString() + "원";
+        document.getElementById('displayTotal').innerText = total.toLocaleString() + "원";
+    }
+
+    function openModal(src) {
+        const modal = document.getElementById('imageModal');
+        document.getElementById('modalImg').src = src;
+        modal.style.display = 'flex';
     }
 
     function submitOrder() {
         const branch = document.getElementById('branchName').value;
         const contact = document.getElementById('contactNum').value;
-        if(!branch || !contact) return alert("지점명과 연락처를 입력하세요.");
-        let details = []; let splitItems = [];   
-        products.forEach((p, i) => {
-            let q = document.getElementById(`qty_${i}`).value;
+        if(!branch || !contact) return alert("정보를 입력하세요.");
+        
+        let details = []; let splitItems = []; let total = 0;
+        products.forEach(p => {
+            const q = orderQty[p.name] || 0;
             if(q > 0) {
+                const price = parseInt(p.price.replace(/[^0-9]/g, "")) || 0;
                 details.push(`${p.name} : ${q}개`);
                 splitItems.push(`${p.name}:${q}`);
+                total += (price * q);
             }
         });
         if(details.length === 0) return alert("수량을 선택하세요.");
-        const summaryText = `[지점명] ${branch}\n[연락처] ${contact}\n\n[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
+
+        const summary = `[지점] ${branch}\n[연락처] ${contact}\n\n[주문내역]\n${details.join("\n")}\n\n총 합계: ${total.toLocaleString()}원`;
         document.getElementById('loader').style.display = 'flex';
-        document.getElementById('loaderText').innerText = "주문을 전송 중입니다...";
         const fd = new FormData();
         fd.append("action", "order");
         fd.append("branch", branch + " / " + contact);
-        fd.append("items", splitItems.join(",")); 
-        fd.append("total", totalSum.toLocaleString() + "원");
-        fd.append("order", summaryText);
-        fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
-        .then(() => {
+        fd.append("items", splitItems.join(","));
+        fd.append("total", total.toLocaleString() + "원");
+        fd.append("order", summary);
+
+        fetch(API_URL, { method: "POST", mode: "no-cors", body: fd }).then(() => {
             document.getElementById('loader').style.display = 'none';
-            document.getElementById('stickyTotal').style.display = 'none';
             document.getElementById('orderPage').classList.remove('active');
             document.getElementById('resultPage').classList.add('active');
-            document.getElementById('orderSummary').innerText = summaryText;
+            document.getElementById('orderSummary').innerText = summary;
+            document.getElementById('stickyTotal').style.display = 'none';
             window.scrollTo(0,0);
         });
     }
 
-    function sendEmail() {
-        const email = document.getElementById('userEmail').value;
-        if(!email.includes('@')) return alert("이메일을 확인하세요.");
-        const btn = document.getElementById('emailBtn');
-        btn.disabled = true; btn.innerText = "전송 중...";
-        const fd = new FormData();
-        fd.append("action", "sendEmail");
-        fd.append("email", email);
-        fd.append("branch", document.getElementById('branchName').value);
-        fd.append("order", document.getElementById('orderSummary').innerText);
-        fetch(API_URL, { method: "POST", mode: "no-cors", body: fd })
-        .then(() => { alert("전송 완료!"); btn.disabled = false; btn.innerText = "이메일 전송"; });
-    }
-
     function shareNative() {
         const text = document.getElementById('orderSummary').innerText;
-        if (navigator.share) {
-            navigator.share({ title: '주문내역', text: text }).catch(()=>{});
-        } else {
-            alert("내역을 복사하여 전달해주세요.");
-        }
+        if (navigator.share) navigator.share({ title: '주문서', text: text });
+        else alert("복사하여 사용하세요.");
     }
 </script>
 </body>
