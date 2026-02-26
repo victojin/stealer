@@ -24,7 +24,6 @@
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
         .product-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; text-align: center; background: #fff; display: flex; flex-direction: column; justify-content: space-between; }
         
-        /* 정방형 프레임 이미지 설정 */
         .img-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; margin-bottom: 10px; border-radius: 6px; }
         .img-container img { width: 100%; height: 100%; object-fit: contain; }
         
@@ -33,8 +32,7 @@
         
         .qty-box { display: flex; align-items: center; justify-content: center; gap: 5px; }
         .qty-btn { width: 34px; height: 34px; border: 1px solid #000; background: white; border-radius: 5px; cursor: pointer; font-size: 18px; font-weight: bold; }
-        .qty-input { width: 40px; text-align: center; border: none; font-weight: bold; font-size: 17px; background: transparent; -moz-appearance: textfield; }
-        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .qty-input { width: 40px; text-align: center; border: none; font-weight: bold; font-size: 17px; background: transparent; }
 
         .total-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; color: #fff; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; text-align: center; z-index: 999; }
         .total-label { font-size: 13px; opacity: 0.8; margin-bottom: 5px; }
@@ -46,12 +44,14 @@
 
         .summary-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px dashed #000; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
         .contact-footer { font-size: 11px; color: #888; text-align: center; margin-top: 15px; line-height: 1.6; }
-        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); color: white; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="loader">주문을 처리 중입니다...</div>
+<div id="loader">
+    <div id="loaderText">데이터를 불러오는 중...</div>
+</div>
 
 <div id="stickyTotal" class="total-bar">
     <span class="total-label">총 주문 합계</span>
@@ -81,7 +81,7 @@
         <h2 style="text-align: center; margin: 0;">주문 접수 완료</h2>
         <div class="summary-box" id="orderSummary"></div>
         
-        <button type="button" class="kakao-btn" onclick="shareNative()">카카오톡 공유</button>
+        <button type="button" class="kakao-btn" onclick="shareNative()">공유하기</button>
         
         <div style="margin-top:25px; border-top:1px solid #eee; padding-top:20px;">
             <label>이메일 주문서 받기</label>
@@ -97,63 +97,42 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwpO4gX_LTftiU2zjlAKA5Gv1HBDneHN2kzWMpbUMQQy6VBJ4COTXivKrB2uTZ0yOeDQQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzTCqYiF6j42VleizLlaGkahj_zAIVaqAWproOzNs1qpxpfWJWkFh1TIXpqSkS3Ztc/exec";
     
-    const products = [
-        { cat: "[스틸러 X 페이커]", name: "챔피언 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/75c18dfa480693041fde4faa062c0ad5.jpg" },
-        { name: "챔피언 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/da971c987d88b5b3ffbf992c8639b7b8.jpg" },
-        { name: "챔피언 STL29", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/16277d1cf8a1275abb02b41c0dd3c303.jpg" },
-        { name: "갓 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/861cccd3945f90009943027d3317c54d.jpg" },
-        { name: "갓 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/90eb64fc8d697a12356bc6aa22a5643d.jpg" },
-        { name: "갓 STL08", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/791503ad39151ff416caf7265ce4305a.jpg" },
-        { name: "이터널 STL01", price: 128000, img: "https://stealer.co.kr/web/product/small/202411/ce943b8c04f0b44f210782666a7b34b6.jpg" },
-        { name: "이터널 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/afbc6515f53980ee99b7227a4e7c7137.jpg" },
-        { name: "이터널 STL28", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/402640e623db77e64f7ff3430b9fb4d8.jpg" },
-        { name: "티탄 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/b2ec96e7764b69293221ea434acf391c.jpg" },
-        { name: "티탄 STL02", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/602da9b3c6869e32a6794cde67e6500b.jpg" },
-        { name: "티탄 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/2a2b197d7d20176cf0df80aac9c6057a.jpg" },
-        { name: "레전드 STL01", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/f4e6ea37ddc32160fe2d2ba16652817a.jpg" },
-        { name: "레전드 STL03", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/4542fd7c2f3173c73fe5f7c2103c1920.jpg" },
-        { name: "레전드 STL29", price: 128000, img: "https://stealer.co.kr/web/product/tiny/202408/20ecba971e92aaa2922cc145425a9270.jpg" },
-        { name: "피닉스 STL01", price: 140000, img: "https://stealer.co.kr/web/product/tiny/202408/b77b5bebec8a10473aa59e194c94c633.jpg" },
-        
-        { cat: "[뮤지크 X 코카-콜라]", name: "칙 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/21f0ea3e0d2d1ed82442d1cfa022149b.png" },
-        { name: "칙 track.9", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/0957dc0ed8316f973b1d82779044dac3.png" },
-        { name: "팅탱 track.B", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a1801e5141be283862a297d5c64a8b73.png" },
-        { name: "팅탱 track.S", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a00d12e149fadef5a289921e5bf123e1.png" },
-        { name: "팅탱 track.G", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/62c275ea2d798c64d9b9b4df9c0034c8.png" },
-        { name: "브르르 track.29", price: 110000, img: "https://muzik.co.kr/web/product/medium/202503/fa5c5fa7f9591c89a164b82d58fae7a7.png" },
-        { name: "푸쉬 track.B", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/c4ce3571205530de6e622a3f51fb852c.png" },
-        { name: "푸쉬 track.S", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/4e1474dfb1c034f98c9b530a407963fc.png" },
-        { name: "푸쉬 track.G", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/4e1474dfb1c034f98c9b530a407963fc.png" },
-        { name: "프리즈 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/63a4c8d2cdb3c6c18ea7e579a3240db8.png" },
-        { name: "프리즈 track.1(Y/T)", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/68de9a8cc7c7829dd309c2c023251155.png" },
-        { name: "프리즈 track.38", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/0d530e801e9ce94895c7fc55003048a8.png" },
-        { name: "팝팝 track.1", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/c66955fcdd45605946c8c82945f50d3e.png" },
-        { name: "팝팝 track.3", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/a33cd7e262dd886889677e38fd13691a.png" },
-        { name: "팝팝 track.6", price: 110000, img: "https://muzik.co.kr/web/product/medium/202502/42553f4486a3c2917ba3e1472cc37105.png" },
-        { name: "걸프 track.1", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/5d683bedbd30e964906a4f1dde58a3ee.png" },
-        { name: "걸프 track.3", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/b6cfe0270899844a762cfa8aa1c1f673.png" },
-        { name: "걸프 track.38", price: 115000, img: "https://muzik.co.kr/web/product/medium/202502/c42dab4fa6051543ed6e707cb9a11026.png" }
-    ];
-
+    let products = [];
     let totalSum = 0;
-    const grid = document.getElementById('productGrid');
 
-    products.forEach((p, i) => {
-        if(p.cat) grid.innerHTML += `<div class="category-title">${p.cat}</div>`;
-        grid.innerHTML += `
-            <div class="product-card">
-                <div class="img-container"><img src="${p.img}"></div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-price">${p.price.toLocaleString()}원</div>
-                <div class="qty-box">
-                    <button type="button" class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
-                    <input type="number" id="qty_${i}" class="qty-input" value="0" readonly>
-                    <button type="button" class="qty-btn" onclick="updateQty(${i}, 1)">+</button>
-                </div>
-            </div>`;
-    });
+    // 페이지 로드 시 구글 시트에서 제품 정보 가져오기
+    window.onload = function() {
+        document.getElementById('loader').style.display = 'flex';
+        
+        // 구글 앱스클립트의 getProductData 함수 실행
+        google.script.run.withSuccessHandler(function(data) {
+            products = data;
+            renderProducts();
+            document.getElementById('loader').style.display = 'none';
+        }).getProductData();
+    };
+
+    function renderProducts() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        
+        products.forEach((p, i) => {
+            if(p.cat) grid.innerHTML += `<div class="category-title">${p.cat}</div>`;
+            grid.innerHTML += `
+                <div class="product-card">
+                    <div class="img-container"><img src="${p.img}"></div>
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">${p.price.toLocaleString()}원</div>
+                    <div class="qty-box">
+                        <button type="button" class="qty-btn" onclick="updateQty(${i}, -1)">-</button>
+                        <input type="number" id="qty_${i}" class="qty-input" value="0" readonly>
+                        <button type="button" class="qty-btn" onclick="updateQty(${i}, 1)">+</button>
+                    </div>
+                </div>`;
+        });
+    }
 
     function updateQty(i, d) {
         const input = document.getElementById(`qty_${i}`);
@@ -187,7 +166,9 @@
         
         const summaryText = `[지점명] ${branch}\n[연락처] ${contact}\n\n[주문내역]\n${details.join("\n")}\n\n총 합계: ${totalSum.toLocaleString()}원`;
         
+        document.getElementById('loaderText').innerText = "주문을 전송 중입니다...";
         document.getElementById('loader').style.display = 'flex';
+
         const fd = new FormData();
         fd.append("action", "order");
         fd.append("branch", branch + " / " + contact);
